@@ -6,3 +6,7 @@ sending data:
     for LINE in `cat test.log`; do curl -X POST "http://localhost:5000/create" -d
         "data=$LINE"; done
 
+
+for gettileno.py, set the lat/lon area and max zoom that you want, then run it:
+
+    python ./gettileno.py

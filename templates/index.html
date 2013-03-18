@@ -1,51 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="static/css/leaflet.css" />
     <link href="static/css/style.css" rel="stylesheet">
     <script type="text/javascript" src="static/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="static/socket.io.js"></script>
-    <script>
 
-WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
-WEB_SOCKET_DEBUG = true;
-
-// socket.io specific code
-var socket = io.connect('/track');
-
-$(window).bind("beforeunload", function() {
-    socket.disconnect();
-});
-
-socket.on('connect', function () {
-    socket.emit('connect');
-});
-
-socket.on('position', function (msg) {
-    $('#records').append($('<p>').append($('<em>').text(msg)));
-});
-
-socket.on('reconnect', function () {
-    $('#records').remove();
-    message('System', 'Reconnected to the server');
-});
-
-socket.on('reconnecting', function () {
-    message('System', 'Attempting to re-connect to the server');
-});
-
-socket.on('error', function (e) {
-    message('System', e ? e : 'A unknown error occurred');
-});
-
-function message (from, msg) {
-    $('#records').append($('<p>').append($('<b>').text(from), msg));
-}
-</script>
+    <script src="static/leaflet.js"></script>
+    <script src="static/app.js"></script>
 </head>
 
 <body>
   <div id="track">
       <div id="records"></div>
   </div>
+  <div id="map"></div>
 </body>
 </html>

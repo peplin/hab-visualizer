@@ -1,2 +1,8 @@
 High-altitude Balloon Visualizer
 ================================
+
+sending data:
+
+    for LINE in `cat test.log`; do curl -X POST "http://localhost:5000/create" -d
+        "data=$LINE"; done
+

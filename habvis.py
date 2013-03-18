@@ -32,15 +32,9 @@ class HABMessage(object):
     def __getattr__(self, name):
         return self._fields[self.KEYS.index(name)]
 
-def visualize(input_stream, **kwargs):
-    for line in input_stream:
-        if not line.startswith("$$"):
-            continue
-
-        message = HABMessage(line)
-        print("%f, %f @ %fm" % (float(message.latitude),
-                float(message.longitude),
-                float(message.altitude)))
+    def to_dict(self):
+        return {'latitude': self.latitude, 'longitude': self.longitude,
+                'altitude': self.altitude}
 
 
 class HABNamespace(BaseNamespace, BroadcastMixin):
@@ -53,17 +47,6 @@ class HABNamespace(BaseNamespace, BroadcastMixin):
     def on_connect(self):
         self.listeners.append(self)
 
-def read_stdin(callback):
-    while True:
-        with open("test.log", 'r') as log:
-            where = log.tell()
-            line = log.readline()
-            if not line:
-                time.sleep(1)
-                log.seek(where)
-            else:
-                callback(line)
-
 
 @app.route('/')
 def index():
@@ -72,12 +55,14 @@ def index():
 
 @app.route('/create', methods=['POST'])
 def create():
-    name = request.form.get("name")
     if len(HABNamespace.listeners) > 0:
         # is there a better way to broadcast? we seem to need a reference to
         # just any old client
-        HABNamespace.listeners[0].broadcast_event('position',
-                request.form['data'])
+        line = request.form['data']
+        if line.startswith("$$"):
+            message = HABMessage(line)
+            HABNamespace.listeners[0].broadcast_event('position',
+                    message.latitude, message.longitude, message.altitude)
     return Response()
 
 

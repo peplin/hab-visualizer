@@ -2,15 +2,20 @@
 """Visualize live GPS track"""
 
 import sys
-import thread
+from threading import Thread
 import time
-from socketio.server import SocketIOServer
 from socketio import socketio_manage
 from socketio.namespace import BaseNamespace
-from socketio.mixins import BroadcastMixin
+from socketio.mixins import RoomsMixin, BroadcastMixin
+from werkzeug.exceptions import NotFound
 from gevent import monkey
 
+from flask import Flask, Response, request, render_template, url_for, redirect
+
 monkey.patch_all()
+
+app = Flask(__name__)
+app.debug = True
 
 class InvalidMessage(Exception): pass
 
@@ -39,71 +44,52 @@ def visualize(input_stream, **kwargs):
 
 
 class HABNamespace(BaseNamespace, BroadcastMixin):
+    listeners = []
+
     def recv_disconnect(self):
         self.disconnect(silent=True)
 
     # TODO recv_connect doesn't seem to work, so I defined a user event
     def on_connect(self):
-        self.request['listeners'].append(self)
+        self.listeners.append(self)
 
 def read_stdin(callback):
     while True:
-        time.sleep(1);
-        callback("$$KB3TLD,1,2,3,4,5,*CRC16")
-    # for line in sys.stdin:
-        # callback(line)
-
-class Application(object):
-    def __init__(self):
-        self.request = {
-            'listeners': []
-        }
-
-        self.input_handler = thread.start_new_thread(read_stdin,
-                [self.new_message])
-
-    def new_message(self, data):
-        for listener in self.request['listeners']:
-            listener.broadcast_event('position', data)
-            # is there a better way to broadcast? we seem to need a reference to
-            # just any old client
-            break
-
-    def __call__(self, environ, start_response):
-        path = environ['PATH_INFO'].strip('/')
-
-        if not path:
-            path = 'index.html'
-
-        if path.startswith('static/') or path == 'index.html':
-            try:
-                data = open(path).read()
-            except Exception:
-                return not_found(start_response)
-
-            if path.endswith(".js"):
-                content_type = "text/javascript"
-            elif path.endswith(".css"):
-                content_type = "text/css"
-            elif path.endswith(".swf"):
-                content_type = "application/x-shockwave-flash"
+        with open("test.log", 'r') as log:
+            where = log.tell()
+            line = log.readline()
+            if not line:
+                time.sleep(1)
+                log.seek(where)
             else:
-                content_type = "text/html"
+                callback(line)
 
-            start_response('200 OK', [('Content-Type', content_type)])
-            return [data]
 
-        if path.startswith("socket.io"):
-            socketio_manage(environ, {'': HABNamespace}, self.request)
-        else:
-            return not_found(start_response)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-def not_found(start_response):
-    start_response('404 Not Found', [])
-    return ['<h1>Not Found</h1>']
+
+@app.route('/create', methods=['POST'])
+def create():
+    name = request.form.get("name")
+    if len(HABNamespace.listeners) > 0:
+        # is there a better way to broadcast? we seem to need a reference to
+        # just any old client
+        HABNamespace.listeners[0].broadcast_event('position',
+                request.form['data'])
+    return Response()
+
+
+@app.route('/socket.io/<path:remaining>')
+def socketio(remaining):
+    try:
+        socketio_manage(request.environ, {'/track': HABNamespace}, request)
+    except:
+        app.logger.error("Exception while handling socketio connection",
+                         exc_info=True)
+    return Response()
+
 
 if __name__ == '__main__':
-    print 'Listening on port 8080 and on port 843 (flash policy server)'
-    SocketIOServer(('0.0.0.0', 8080), Application(),
-        resource="socket.io", policy_server=True,
-        policy_listener=('0.0.0.0', 10843)).serve_forever()
+    app.run()

@@ -41,7 +41,8 @@ function message (from, msg) {
 }
 
 $(document).ready(function() {
-    map = L.map('map').setView([40.0245, -118.936], 13);
+    var startingPosition = new L.LatLng(40.3675,-116.72);
+    map = L.map('map').setView(startingPosition, 13);
     L.tileLayer('http://localhost:5000/static/images/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
@@ -50,12 +51,13 @@ $(document).ready(function() {
         // attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         // maxZoom: 14
     // }).addTo(map);
+    //
 
     ourPath = L.polyline([], {color: 'blue'}).addTo(map);
-    ourPathHead = L.marker([40.0245, -118.936]).addTo(map);
+    ourPathHead = L.marker(startingPosition).addTo(map);
     // create a red polyline from an arrays of LatLng points
     path = L.polyline([], {color: 'red'}).addTo(map);
-    pathHead = L.circle([40.0245, -118.936], 100, {'color': 'red'}).addTo(map);
+    pathHead = L.circle(startingPosition, 100).addTo(map);
 
     $("#our_latitude").val(ourPathHead.getLatLng().lat);
     $("#our_longitude").val(ourPathHead.getLatLng().lng);

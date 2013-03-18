@@ -32,12 +32,16 @@ tiles = defaultdict(set)
 #new
 # 39.934 to 40.685
 # -117.459 to -116.116
-min_latitude = 39.934
-max_latitude = 40.685
+
+# relaly new
+# 39.6995 to  39.5099
+# -117.0425 to -116.7067
+min_latitude = 39.5099
+max_latitude = 39.6995
 latitude = min_latitude
 
-min_longitude = -119.272
-max_longitude = -118.601
+min_longitude = -117.0425
+max_longitude = -116.7067
 
 while latitude <= max_latitude:
     longitude = min_longitude

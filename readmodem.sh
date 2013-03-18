@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-for LINE in `cat test.log`; do
+# minimodem --rx 300 --ascii --stopbits 2 -a -q
+
+while read LINE; do
     echo $LINE
     curl -X POST "http://localhost:5000/create" -d "data=$LINE";
     sleep 1;

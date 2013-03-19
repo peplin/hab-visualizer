@@ -6,7 +6,7 @@ import urllib2
 from collections import defaultdict
 
 def fetch_tile(zoom, tile):
-    target_filepattern = "static/images/%s"
+    target_filepattern = "static/images/tiles/%s"
     filename = "%d/%d/%d.png" % (zoom, tile[0], tile[1])
     folder = os.path.dirname(target_filepattern % filename)
     try:

@@ -43,7 +43,7 @@ function message (from, msg) {
 $(document).ready(function() {
     var startingPosition = new L.LatLng(39.970806, -119.387054);
     map = L.map('map').setView(startingPosition, 13);
-    L.tileLayer('http://localhost:5000/static/images/{z}/{x}/{y}.png', {
+    L.tileLayer('http://localhost:5000/static/images/tiles/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
     }).addTo(map);

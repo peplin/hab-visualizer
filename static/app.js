@@ -20,7 +20,7 @@ socket.on('connect', function () {
 socket.on('position', function (latitude, longitude, altitude) {
     pathHead.setLatLng([latitude, longitude]);
     path.addLatLng(pathHead.getLatLng());
-    map.fitBounds(path.getBounds());
+    // map.fitBounds(path.getBounds());
 });
 
 socket.on('reconnect', function () {

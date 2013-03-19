@@ -26,7 +26,8 @@ class HABMessage(object):
     def __init__(self, data):
         self._fields = data.split(",")
         if len(self._fields) != 6:
-            raise InvalidMessage()
+            raise InvalidMessage("expected 9 fields but got %d" %
+                    len(self._fields))
         # TODO check crc
 
     def __getattr__(self, name):
